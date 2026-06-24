@@ -1,11 +1,10 @@
 model Profile {
-    id String @id @default(ulid())
+    id           String  @id @default(ulid())
     profilePhoto String?
-    bio String?
+    bio          String?
 
-
-    userId String @unique
-    
-    
-
+    userId    String   @unique
+    user      User     @relation(fields: [userId], references: [id])
+    createAt  DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
