@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "./lib/prisma";
 import config from "./config/index";
-import httpStatus  from "http-status";
+import httpStatus from "http-status";
 
 const app: Application = express();
 
@@ -14,20 +14,40 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.get("/", (req: Request, res: Response) => {
+  res.json({ message: "Hello World!" });
+});
+
 // Register
 app.post("/api/auth/register", async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, profilePhoto } = req.body;
+
+  const isExitUser = await prisma.user.findUnique({ where: { email } });
+
+  if (isExitUser) {
+    res.status(httpStatus.CONFLICT).json({ success: false, message: "User already exists" });
+    return;
+  }
 
   const hashedPassword = await bcrypt.hash(
     password,
-    Number(config.bcrypt_salt_rounds) || 10
+    Number(config.bcrypt_salt_rounds) || 10,
   );
 
-  const user = await prisma.user.create({
+  const createdUser = await prisma.user.create({
     data: { name, email, password: hashedPassword },
   });
 
-  res.status(httpStatus.CREATED).json({ success: true, data: { id: user.id, email: user.email } });
+  await prisma.profile.create({
+    data: { userId: createdUser.id, profilePhoto },
+  });
+
+  res.status(httpStatus.CREATED).json({
+    success: true,
+    message: "User created successfully",
+    statusCode: httpStatus.CREATED,
+    data: { user: createdUser },
+  });
 });
 
 // Login
@@ -44,20 +64,22 @@ app.post("/api/auth/login", async (req: Request, res: Response) => {
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    res.status(httpStatus.UNAUTHORIZED).json({ success: false, message: "Invalid credentials" });
+    res
+      .status(httpStatus.UNAUTHORIZED)
+      .json({ success: false, message: "Invalid credentials" });
     return;
   }
 
   const accessToken = jwt.sign(
     { id: user.id, email: user.email, role: user.role },
     config.jwt_access_token as string,
-    { expiresIn: "1d" }
+    { expiresIn: "1d" },
   );
 
   const refreshToken = jwt.sign(
     { id: user.id },
     config.jwt_refresh_token as string,
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 
   res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: false });
