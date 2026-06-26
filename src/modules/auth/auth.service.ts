@@ -1,6 +1,8 @@
+import jwt, { SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
-import { UserFindUniqueOrThrowArgs } from "./../../../generated/prisma/models/User";
+import config from "../../config";
+import { jwtUtils } from "../../utils/jwt";
 
 type LoginUserPayload = {
   email: string;
@@ -21,7 +23,27 @@ const loginUser = async (payload: LoginUserPayload) => {
   if (!isPasswordMatch) {
     throw new Error("Password does not match");
   }
-  return user;
+
+  const jtwPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    jtwPayload,
+    config.jwt_access_token as string,
+    config.jwt_access_token_expire_in as SignOptions,
+  );
+
+  const refreshToken = jwtUtils.createToken(
+    jtwPayload,
+    config.jwt_refresh_token as string,
+    config.jwt_refresh_token_expire_in as SignOptions,
+  );
+
+  return { accessToken, refreshToken };
 };
 
 export const authServices = {
