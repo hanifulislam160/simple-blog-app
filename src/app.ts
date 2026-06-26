@@ -7,6 +7,7 @@ import { prisma } from "./lib/prisma";
 import config from "./config/index";
 import httpStatus from "http-status";
 import { userRoutes } from "./modules/user/user.route";
+import { authRoutes } from "./modules/auth/auth.route";
 
 const app: Application = express();
 
@@ -20,7 +21,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // Register
-app.use('/api/user', userRoutes)
+app.use("/api/user", userRoutes);
+// login
+app.use("/api/user", authRoutes);
 
 // Login
 app.post("/api/auth/login", async (req: Request, res: Response) => {
