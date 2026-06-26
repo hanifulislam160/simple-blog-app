@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import { prisma } from "./lib/prisma";
 import config from "./config/index";
 import httpStatus from "http-status";
+import { userRoutes } from "./modules/user/user.route";
 
 const app: Application = express();
 
@@ -19,36 +20,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 // Register
-app.post("/api/auth/register", async (req: Request, res: Response) => {
-  const { name, email, password, profilePhoto } = req.body;
-
-  const isExitUser = await prisma.user.findUnique({ where: { email } });
-
-  if (isExitUser) {
-    res.status(httpStatus.CONFLICT).json({ success: false, message: "User already exists" });
-    return;
-  }
-
-  const hashedPassword = await bcrypt.hash(
-    password,
-    Number(config.bcrypt_salt_rounds) || 10,
-  );
-
-  const createdUser = await prisma.user.create({
-    data: { name, email, password: hashedPassword },
-  });
-
-  await prisma.profile.create({
-    data: { userId: createdUser.id, profilePhoto },
-  });
-
-  res.status(httpStatus.CREATED).json({
-    success: true,
-    message: "User created successfully",
-    statusCode: httpStatus.CREATED,
-    data: { user: createdUser },
-  });
-});
+app.use('/api/user', userRoutes)
 
 // Login
 app.post("/api/auth/login", async (req: Request, res: Response) => {
