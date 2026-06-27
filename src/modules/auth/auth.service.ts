@@ -3,11 +3,9 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
 import { jwtUtils } from "../../utils/jwt";
+import { LoginUserPayload } from "./auth.interface";
 
-type LoginUserPayload = {
-  email: string;
-  password: string;
-};
+
 
 const loginUser = async (payload: LoginUserPayload) => {
   const { email, password } = payload;

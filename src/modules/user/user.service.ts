@@ -39,7 +39,7 @@ const registerIntoDB = async (payload: RegisterUserPayload) => {
       password: true,
     },
     include: {
-      profileId: true,
+      profile: true,
     },
   });
 
@@ -47,6 +47,12 @@ const registerIntoDB = async (payload: RegisterUserPayload) => {
   return user;
 };
 
+
+const getUserProfileFromDb = async() =>{
+  
+}
+
 export const userServices = {
   registerIntoDB,
+  getUserProfileFromDb,
 };
