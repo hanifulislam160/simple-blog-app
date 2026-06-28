@@ -22,14 +22,16 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
 
 const getMyProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   
-  const { accessToken } = req.cookies;
-  const verificationToken = jwtUtils.verifyToken(accessToken, config.jwt_access_token);
+  // const { accessToken } = req.cookies;
+  // console.log("user",req.user)
+  
+  // const verificationToken = jwtUtils.verifyToken(accessToken, config.jwt_access_token);
 
-  if(typeof verificationToken === 'string'){
-    throw new Error("Invalid token");
-  }
+  // if(typeof verificationToken === 'string'){
+  //   throw new Error("Invalid token");
+  // }
 
-  const profile = await userServices.getUserProfileFromDb(verificationToken.id);
+  const profile = await userServices.getUserProfileFromDb(req.user.id as string);
 
   sendResponse(res, {
     success: true,
