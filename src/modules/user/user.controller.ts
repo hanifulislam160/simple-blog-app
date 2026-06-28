@@ -1,8 +1,11 @@
+import jwt  from 'jsonwebtoken';
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import httpStatus from "http-status";
 import { userServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import config from '../../config';
+import { jwtUtils } from '../../utils/jwt';
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -17,16 +20,23 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getMyProfile = catchAsync(async (req: Request, res: Response) => {
-  const token = req.cookies.refreshToken;
-  console.log('token',token);
+const getMyProfile = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  
+  const { accessToken } = req.cookies;
+  const verificationToken = jwtUtils.verifyToken(accessToken, config.jwt_access_token);
 
-  // sendResponse(res, {
-  //   success: true,
-  //   statusCode: httpStatus.OK,
-  //   message: "User profile retrieved successfully",
-  //   data: {},
-  // });
+  if(typeof verificationToken === 'string'){
+    throw new Error("Invalid token");
+  }
+
+  const profile = await userServices.getUserProfileFromDb(verificationToken.id);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "User profile retrieved successfully",
+    data: profile,
+  });
 });
 
 export const userController = {
