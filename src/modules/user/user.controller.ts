@@ -31,7 +31,7 @@ const getMyProfile = catchAsync(async (req: Request, res: Response, next: NextFu
   //   throw new Error("Invalid token");
   // }
 
-  const profile = await userServices.getUserProfileFromDb(req.user.id as string);
+  const profile = await userServices.getUserProfileFromDb(req.user?.id as string);
 
   sendResponse(res, {
     success: true,

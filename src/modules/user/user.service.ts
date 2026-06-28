@@ -39,7 +39,7 @@ const registerIntoDB = async (payload: RegisterUserPayload) => {
       password: true,
     },
     include: {
-      profile: true,
+      profileId: true,
     },
   });
 
@@ -55,7 +55,7 @@ const getUserProfileFromDb = async(userId: string) =>{
       password:true
     },
     include:{
-      profile:true
+      profileId:true
     }
   })
   return user
