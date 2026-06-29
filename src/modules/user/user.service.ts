@@ -1,9 +1,9 @@
+import { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 // import  httpStatus  from "http-status";
 import { RegisterUserPayload } from "./user.interface";
-
 
 const registerIntoDB = async (payload: RegisterUserPayload) => {
   const { name, email, password, profilePhoto } = payload;
@@ -23,12 +23,12 @@ const registerIntoDB = async (payload: RegisterUserPayload) => {
     data: { name, email, password: hashedPassword },
   });
 
-   await prisma.profile.create({
-     data: {
-       userId: createdUser.id,
-       profilePhoto,
-     },
-   });
+  await prisma.profile.create({
+    data: {
+      userId: createdUser.id,
+      profilePhoto,
+    },
+  });
 
   const user = await prisma.user.findUnique({
     where: {
@@ -39,29 +39,54 @@ const registerIntoDB = async (payload: RegisterUserPayload) => {
       password: true,
     },
     include: {
-      profileId: true,
+      profile: true,
     },
   });
-
 
   return user;
 };
 
-
-const getUserProfileFromDb = async(userId: string) =>{
+const getUserProfileFromDb = async (userId: string) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
-    omit:{
-      password:true
+    omit: {
+      password: true,
     },
-    include:{
-      profileId:true
-    }
-  })
-  return user
-}
+    include: {
+      profile: true,
+    },
+  });
+  return user;
+};
+
+const updateMyProfileDB = async (userId: string, payload: any) => {
+  const { email, name, profilePhoto, bio } = payload;
+
+  const updateUser = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      email,
+      name,
+      profile: {
+        update: {
+          profilePhoto,
+          bio,
+        },
+      },
+    },
+    omit: {
+      password: true,
+    },
+    include: {
+      profile: true,
+    },
+  });
+
+  return updateUser;
+};
 
 export const userServices = {
   registerIntoDB,
   getUserProfileFromDb,
+  updateMyProfileDB,
 };
