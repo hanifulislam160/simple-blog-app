@@ -3,6 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { userRoutes } from "./modules/user/user.route";
 import { authRoutes } from "./modules/auth/auth.route";
+import { postRoutes } from "./modules/post/post.route";
+import { commentRoutes } from "./modules/comment/comment.route";
 
 const app: Application = express();
 
@@ -17,10 +19,13 @@ app.get("/", (req: Request, res: Response) => {
 
 // Register
 app.use("/api/user", userRoutes);
-app.use("/api/user", userRoutes);
+// app.use("/api/user", userRoutes);
 // login
 app.use("/api/user", authRoutes);
 
-
+// post
+app.use("/api/post", postRoutes);
+// comment
+app.use("/api/comment", commentRoutes);
 
 export default app;
