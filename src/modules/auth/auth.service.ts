@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from "jsonwebtoken";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { prisma } from "../../lib/prisma";
 import config from "../../config";
@@ -44,6 +44,42 @@ const loginUser = async (payload: LoginUserPayload) => {
   return { accessToken, refreshToken };
 };
 
+const refreshToken = async (refreshToken: string) => {
+  const verificationToken = jwtUtils.verifyToken(
+    refreshToken,
+    config.jwt_refresh_token as string,
+  );
+
+  if (!verificationToken.success) {
+    throw new Error(verificationToken.error);
+  }
+
+  const {id} = verificationToken.data as JwtPayload;
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const jtwPayload = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtUtils.createToken(
+    jtwPayload,
+    config.jwt_access_token as string,
+    config.jwt_access_token_expire_in as SignOptions,
+  );
+
+  return { accessToken };
+
+}
+
 export const authServices = {
   loginUser,
+  refreshToken,
 };
