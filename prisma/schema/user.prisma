@@ -10,16 +10,8 @@ model User {
     createAt     DateTime     @default(now())
     updatedAt    DateTime     @updatedAt
     profile      Profile?
+    comments Comment[]
+    posts    Post[]
     
 }
 
-enum ActiveStatus {
-    ACTIVE
-    BLOCKED
-}
-
-enum Role {
-    USER
-    ADMIN
-    AUTHOR
-}
