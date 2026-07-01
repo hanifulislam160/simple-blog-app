@@ -47,10 +47,34 @@ const getPostById = catchAsync(
   },
 );
 
+
+const updatePost = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const payload = req.body;
+
+  // Extracting both id and role appended by your auth middleware
+  const userId = req.user?.id;
+  const userRole = req.user?.role;
+
+  const result = await postServices.updatePost(
+    id as string,
+    payload,
+    userId as string,
+    userRole as string,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Post updated successfully",
+    data: result,
+  });
+});
+
 const getMyPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.id;
-    const result = await postServices.getMyPostsFromDB(userId as string);
+    const authorId = req.user?.id;
+    const result = await postServices.getMyPostsFromDB(authorId as string);
 
     sendResponse(res, {
       success: true,
@@ -66,4 +90,5 @@ export const postController = {
   getAllPost,
   getPostById,
   getMyPosts,
+  updatePost, 
 };

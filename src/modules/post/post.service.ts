@@ -59,10 +59,10 @@ const getPostByIdFromDB = async (postId: string) => {
 const getMyPostsFromDB = async (userId: string) => {
   const posts = await prisma.post.findMany({
     where: {
-      authorId: userId,
-      orderBy: {
-        createdAt: "desc",
-      },
+      authorId: userId, // Keep ONLY filtering arguments here
+    },
+    orderBy: {
+      createAt: "desc", // Move this OUT of the where block to the root level
     },
     include: {
       comments: true,
@@ -82,9 +82,48 @@ const getMyPostsFromDB = async (userId: string) => {
   return posts;
 };
 
+
+const updatePost = async (
+  postId: string,
+  payload: Partial<ICreatePostPayload>, // Using Partial so users can update individual fields
+  userId: string,
+  userRole: string,
+) => {
+  // 1. Fetch the existing post to verify ownership
+  const existingPost = await prisma.post.findUnique({
+    where: { id: postId },
+  });
+
+  if (!existingPost) {
+    throw new Error("Post not found");
+  }
+
+  // 2. Authorization Check:
+  // Allow if user is an ADMIN, OR if they are the actual author of the post
+  const isAdmin = userRole === "ADMIN";
+  const isAuthor = existingPost.authorId === userId;
+
+  if (!isAdmin && !isAuthor) {
+    throw new Error("You are not authorized to update this post");
+  }
+
+  // 3. Proceed with the update if checks pass
+  const updatedPost = await prisma.post.update({
+    where: {
+      id: postId,
+    },
+    data: {
+      ...payload,
+    },
+  });
+
+  return updatedPost;
+};
+
 export const postServices = {
   createPost,
   getAllpostFromDB,
   getPostByIdFromDB,
   getMyPostsFromDB,
+  updatePost,
 };
