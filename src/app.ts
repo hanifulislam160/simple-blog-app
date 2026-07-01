@@ -21,7 +21,7 @@ app.get("/", (req: Request, res: Response) => {
 app.use("/api/user", userRoutes);
 // app.use("/api/user", userRoutes);
 // login
-app.use("/api/user", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // post
 app.use("/api/posts", postRoutes);
