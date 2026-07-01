@@ -14,4 +14,10 @@ router.get("/", postController.getAllPost);
 
 router.get("/:id", postController.getPostById);
 
+router.get(
+  "/my-posts",
+  auth(Role.ADMIN, Role.USER, Role.AUTHOR),
+  postController.getMyPosts,
+);
+
 export const postRoutes = router;
