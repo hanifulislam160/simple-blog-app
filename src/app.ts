@@ -24,8 +24,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/user", authRoutes);
 
 // post
-app.use("/api/post", postRoutes);
+app.use("/api/posts", postRoutes);
 // comment
-app.use("/api/comment", commentRoutes);
+app.use("/api/comments", commentRoutes);
 
 export default app;
