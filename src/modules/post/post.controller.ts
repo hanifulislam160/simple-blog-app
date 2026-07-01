@@ -47,7 +47,6 @@ const getPostById = catchAsync(
   },
 );
 
-
 const updatePost = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const payload = req.body;
@@ -71,6 +70,26 @@ const updatePost = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deletePost = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+  const userRole = req.user?.role;
+
+  const result = await postServices.deletePostFromDB(
+    id as string,
+    userId as string,
+    userRole as string,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Post deleted successfully",
+    data: result,
+  });
+});
+
+
 const getMyPosts = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const authorId = req.user?.id;
@@ -85,10 +104,30 @@ const getMyPosts = catchAsync(
   },
 );
 
+const getPostStats = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const userRole = req.user?.role;
+
+  const result = await postServices.getPostStatsFromDB(
+    userId as string,
+    userRole as string,
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Dashboard stats fetched successfully",
+    data: result,
+  });
+});
+
 export const postController = {
   createPost,
   getAllPost,
   getPostById,
   getMyPosts,
-  updatePost, 
+  updatePost,
+  deletePost,
+  getPostStats,
+
 };

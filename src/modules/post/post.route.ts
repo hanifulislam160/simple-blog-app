@@ -24,6 +24,18 @@ router.put(
   postController.updatePost,
 );
 
+router.delete(
+  "/:id",
+  auth(Role.ADMIN, Role.USER, Role.AUTHOR), // Secures the endpoint
+  postController.deletePost,
+);
+
+router.get(
+  "/stats",
+  auth(Role.ADMIN, Role.USER, Role.AUTHOR),
+  postController.getPostStats,
+);
+
 router.get("/:id", postController.getPostById);
 
 export const postRoutes = router;
