@@ -36,7 +36,7 @@ const getPostById = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     console.log("id", id);
-    const result = await postServices.getPostByIdFromDB(id as string);
+    const result = await postServices.getPostById(id as string);
 
     sendResponse(res, {
       success: true,
